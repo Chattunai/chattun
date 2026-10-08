@@ -6,9 +6,7 @@
   <title>Chattun AI</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -60,7 +58,6 @@
     .welcome {
       text-align: center;
       margin-top: 30px;
-      box-shadow: 0 5px 20px rgba(0,0,0,.06);
     }
 
     .user {
@@ -182,26 +179,38 @@ form.addEventListener("submit", async function(event) {
 
     const response = await fetch("/", {
       method: "POST",
-
       headers: {
         "Content-Type": "application/json"
       },
-
       body: JSON.stringify({
         message: text
       })
     });
 
-    const data = await response.json();
+    const rawText = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      data = {
+        error: rawText
+      };
+    }
 
     if (data.response) {
 
-      addMessage("Chattun: " + data.response, "assistant");
+      addMessage(
+        "Chattun: " + data.response,
+        "assistant"
+      );
 
     } else {
 
       addMessage(
-        "Chattun: " + (data.error || "ما فهمتش الإجابة."),
+        "Chattun: ❌ " +
+        (data.error || "خطأ غير معروف"),
         "assistant"
       );
     }
@@ -209,7 +218,7 @@ form.addEventListener("submit", async function(event) {
   } catch (error) {
 
     addMessage(
-      "Chattun: صار خطأ في الاتصال بالخادم.",
+      "Chattun: ❌ خطأ في الاتصال: " + error.message,
       "assistant"
     );
   }
@@ -225,6 +234,4 @@ form.addEventListener("submit", async function(event) {
 
 </body>
 </html>
-      
-  
-   
+    
