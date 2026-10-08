@@ -1,5 +1,5 @@
 export default {
-  async fetch(request, env) {
+ @cf/meta/llama-3.1-8b-instruct-fast async fetch(request, env) {
 
     if (request.method === "GET") {
       return env.ASSETS.fetch(request);
