@@ -1,5 +1,12 @@
 export default {
   async fetch(request, env) {
+
+    // عرض واجهة Chattun
+    if (request.method === "GET") {
+      return env.ASSETS.fetch(request);
+    }
+
+    // السماح للواجهة بالاتصال
     if (request.method === "OPTIONS") {
       return new Response(null, {
         headers: {
@@ -10,19 +17,62 @@ export default {
       });
     }
 
-    if (request.method !== "POST") {
-      return new Response("Chattun AI is running 🤖");
-    }
+    // الذكاء الاصطناعي
+    if (request.method === "POST") {
+      try {
+        const body = await request.json();
+        const message = body.message;
 
-    try {
-      const body = await request.json();
-      const message = body.message;
+        if (!message) {
+          return new Response(
+            JSON.stringify({ error: "Message is required" }),
+            {
+              status: 400,
+              headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
+              }
+            }
+          );
+        }
 
-      if (!message) {
-        return new Response(
-          JSON.stringify({ error: "Message is required" }),
+        const result = await env.AI.run(
+          "@cf/meta/llama-3.1-8b-instruct",
           {
-            status: 400,
+            messages: [
+              {
+                role: "system",
+                content:
+                  "أنت Chattun، مساعد ذكاء اصطناعي مفيد وودود. أجب باللغة التي يستعملها المستخدم."
+              },
+              {
+                role: "user",
+                content: message
+              }
+            ]
+          }
+        );
+
+        return new Response(
+          JSON.stringify({
+            response: result.response
+          }),
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*"
+            }
+          }
+        );
+
+      } catch (error) {
+        return new Response(
+          JSON.stringify({
+            error: "حدث خطأ في Chattun",
+            details: error.message
+          }),
+          {
+            status: 500,
             headers: {
               "Content-Type": "application/json",
               "Access-Control-Allow-Origin": "*"
@@ -30,49 +80,8 @@ export default {
           }
         );
       }
-
-      const result = await env.AI.run(
-        "@cf/meta/llama-3.1-8b-instruct",
-        {
-          messages: [
-            {
-              role: "system",
-              content: "أنت Chattun، مساعد ذكاء اصطناعي مفيد وودود. أجب باللغة التي يستعملها المستخدم."
-            },
-            {
-              role: "user",
-              content: message
-            }
-          ]
-        }
-      );
-
-      return new Response(
-        JSON.stringify({
-          response: result.response
-        }),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-          }
-        }
-      );
-
-    } catch (error) {
-      return new Response(
-        JSON.stringify({
-          error: "حدث خطأ في Chattun",
-          details: error.message
-        }),
-        {
-          status: 500,
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-          }
-        }
-      );
     }
+
+    return new Response("Method not allowed", { status: 405 });
   }
-};
+}; 
