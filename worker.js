@@ -68,7 +68,7 @@ export default {
       } catch (error) {
         return new Response(
           JSON.stringify({
-            error: "حدث خطأ في Chattun",
+            error: "حدث خطأ في Chattun",error: "حدث خطأ في Chattun: " + error.message,
             details: error.message
           }),
           {
