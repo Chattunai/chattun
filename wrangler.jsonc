@@ -1,0 +1,8 @@
+{
+  "name": "chattun",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-08",
+  "ai": {
+    "binding": "AI"
+  }
+}
