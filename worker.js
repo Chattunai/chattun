@@ -6,7 +6,7 @@ export default {
       return env.ASSETS.fetch(request);
     }
 
-    // السماح للواجهة بالاتصال
+    // السماح بالاتصال
     if (request.method === "OPTIONS") {
       return new Response(null, {
         headers: {
@@ -17,17 +17,36 @@ export default {
       });
     }
 
-    // الذكاء الاصطناعي
+    // طلب الذكاء الاصطناعي
     if (request.method === "POST") {
       try {
+
         const body = await request.json();
         const message = body.message;
 
         if (!message) {
           return new Response(
-            JSON.stringify({ error: "Message is required" }),
+            JSON.stringify({
+              error: "Message is required"
+            }),
             {
               status: 400,
+              headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
+              }
+            }
+          );
+        }
+
+        // التحقق من وجود AI
+        if (!env.AI) {
+          return new Response(
+            JSON.stringify({
+              error: "Workers AI binding غير موجود"
+            }),
+            {
+              status: 500,
               headers: {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*"
@@ -58,6 +77,7 @@ export default {
             response: result.response
           }),
           {
+            status: 200,
             headers: {
               "Content-Type": "application/json",
               "Access-Control-Allow-Origin": "*"
@@ -66,10 +86,10 @@ export default {
         );
 
       } catch (error) {
+
         return new Response(
           JSON.stringify({
-            error: "حدث خطأ في Chattun",error: "حدث خطأ في Chattun: " + error.message,
-            details: error.message
+            error: "خطأ حقيقي من Chattun: " + error.message
           }),
           {
             status: 500,
@@ -82,6 +102,17 @@ export default {
       }
     }
 
-    return new Response("Method not allowed", { status: 405 });
+    return new Response(
+      JSON.stringify({
+        error: "Method not allowed"
+      }),
+      {
+        status: 405,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        }
+      }
+    );
   }
-}; 
+};          
