@@ -1,12 +1,10 @@
 export default {
   async fetch(request, env) {
 
-    // عرض واجهة Chattun
     if (request.method === "GET") {
       return env.ASSETS.fetch(request);
     }
 
-    // السماح بالاتصال
     if (request.method === "OPTIONS") {
       return new Response(null, {
         headers: {
@@ -17,10 +15,8 @@ export default {
       });
     }
 
-    // طلب الذكاء الاصطناعي
     if (request.method === "POST") {
       try {
-
         const body = await request.json();
         const message = body.message;
 
@@ -39,7 +35,6 @@ export default {
           );
         }
 
-        // التحقق من وجود AI
         if (!env.AI) {
           return new Response(
             JSON.stringify({
@@ -61,8 +56,7 @@ export default {
             messages: [
               {
                 role: "system",
-                content:
-                  "أنت Chattun، مساعد ذكاء اصطناعي مفيد وودود. أجب باللغة التي يستعملها المستخدم."
+                content: "أنت Chattun، مساعد ذكاء اصطناعي مفيد وودود. أجب باللغة التي يستعملها المستخدم."
               },
               {
                 role: "user",
@@ -74,7 +68,7 @@ export default {
 
         return new Response(
           JSON.stringify({
-            response: result.response
+            response: result.response || "لم أستطع الحصول على إجابة."
           }),
           {
             status: 200,
@@ -86,7 +80,6 @@ export default {
         );
 
       } catch (error) {
-
         return new Response(
           JSON.stringify({
             error: "خطأ حقيقي من Chattun: " + error.message
@@ -115,4 +108,5 @@ export default {
       }
     );
   }
-};          
+};
+              
