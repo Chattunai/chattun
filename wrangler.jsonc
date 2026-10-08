@@ -4,5 +4,9 @@
   "compatibility_date": "2026-10-08",
   "ai": {
     "binding": "AI"
+  },
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS"
   }
 }
