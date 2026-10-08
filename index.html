@@ -1,4 +1,241 @@
 <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chattun AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #111827;
+    }
+
+    .app {
+      max-width: 700px;
+      margin: auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 22px;
+      background: #111827;
+      color: white;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      opacity: .75;
+    }
+
+    .chat {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .welcome {
+      background: white;
+      border-radius: 18px;
+      padding: 25px;
+      text-align: center;
+      margin-top: 30px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.06);
+    }
+
+    .message {
+      background: white;
+      padding: 14px 16px;
+      border-radius: 15px;
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
+    .user {
+      background: #111827;
+      color: white;
+    }
+
+    .input-area {
+      padding: 15px;
+      background: white;
+      border-top: 1px solid #ddd;
+      display: flex;
+      gap: 10px;
+      position: sticky;
+      bottom: 0;
+    }
+
+    input {
+      flex: 1;
+      padding: 15px;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 0 20px;
+      background: #111827;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .5;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header>
+    <h1>Chattun</h1>
+    <p>Your AI assistant</p>
+  </header>
+
+  <main class="chat" id="chat">
+
+    <div class="welcome" id="welcome">
+      <h2>مرحباً بك في Chattun 🤖</h2>
+      <p>اسألني أي سؤال وخلينا نبدأ.</p>
+    </div>
+
+  </main>
+
+  <form class="input-area" id="chatForm">
+
+    <input
+      id="messageInput"
+      type="text"
+      placeholder="اكتب رسالتك..."
+      autocomplete="off"
+    >
+
+    <button id="sendButton" type="submit">
+      إرسال
+    </button>
+
+  </form>
+
+</div>
+
+<script>
+
+const WORKER_URL = "https://chattun.chattunai.workers.dev";
+
+const form = document.getElementById("chatForm");
+const input = document.getElementById("messageInput");
+const chat = document.getElementById("chat");
+const button = document.getElementById("sendButton");
+const welcome = document.getElementById("welcome");
+
+
+function addMessage(text, type) {
+
+  const message = document.createElement("div");
+
+  message.className = "message " + type;
+
+  message.textContent = text;
+
+  chat.appendChild(message);
+
+  chat.scrollTop = chat.scrollHeight;
+}
+
+
+form.addEventListener("submit", async function(event) {
+
+  event.preventDefault();
+
+  const text = input.value.trim();
+
+  if (!text) return;
+
+  if (welcome) {
+    welcome.remove();
+  }
+
+  addMessage("أنت: " + text, "user");
+
+  input.value = "";
+
+  button.disabled = true;
+  button.textContent = "جاري التفكير...";
+
+  try {
+
+    const response = await fetch(WORKER_URL, {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        message: text
+      })
+
+    });
+
+    const data = await response.json();
+
+    if (data.response) {
+
+      addMessage("Chattun: " + data.response, "assistant");
+
+    } else if (data.error) {
+
+      addMessage("Chattun: " + data.error, "assistant");
+
+    } else {
+
+      addMessage("Chattun: ما فهمتش الإجابة.", "assistant");
+
+    }
+
+  } catch (error) {
+
+    addMessage(
+      "Chattun: صار خطأ في الاتصال بالخادم.",
+      "assistant"
+    );
+
+  }
+
+  button.disabled = false;
+  button.textContent = "إرسال";
+
+  input.focus();
+
+});
+
+</script>
+
+</body>
+</html><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
